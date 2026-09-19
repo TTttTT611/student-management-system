@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Student Management System</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">Student Management</div>
+      <nav id="nav" class="nav hidden">
+        <a href="#students">Students</a>
+        <a href="#classes">Classes</a>
+        <a href="#courses">Courses</a>
+        <a href="#grades">Grades</a>
+        <a href="#stats">Statistics</a>
+        <a href="#users" class="admin-only">Users</a>
+        <a href="#logs" class="admin-only">Audit Log</a>
+      </nav>
+      <div id="user-box" class="user-box hidden">
+        <span id="user-name"></span>
+        <button id="change-password-btn" class="btn small secondary">Change password</button>
+        <button id="logout-btn" class="btn small secondary">Sign out</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Login -->
+      <section id="view-login" class="view card narrow">
+        <h2>Sign in</h2>
+        <form id="login-form">
+          <div class="form-row">
+            <label for="login-username">Username</label>
+            <input id="login-username" autocomplete="username" required />
+          </div>
+          <div class="form-row">
+            <label for="login-password">Password</label>
+            <input id="login-password" type="password" autocomplete="current-password" required />
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn primary">Sign in</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Students -->
+      <section id="view-students" class="view card hidden">
+        <div class="toolbar">
+          <h2>Students</h2>
+          <div class="toolbar-right">
+            <input id="student-keyword" placeholder="Search name / number / major" />
+            <select id="student-class-filter"><option value="">All classes</option></select>
+            <button id="student-search-btn" class="btn secondary">Search</button>
+            <button id="student-add-btn" class="btn primary admin-only">Add</button>
+            <button id="student-import-btn" class="btn secondary admin-only">Import</button>
+            <button id="student-export-btn" class="btn secondary admin-only">Export</button>
+            <input id="student-import-file" type="file" accept=".xlsx" class="hidden" />
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th><th>Student No</th><th>Name</th><th>Age</th><th>Gender</th><th>Major</th><th>Class</th><th class="admin-only">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="students-tbody"></tbody>
+          </table>
+        </div>
+        <div id="students-pager" class="pager"></div>
+      </section>
+
+      <!-- Classes -->
+      <section id="view-classes" class="view card hidden">
+        <div class="toolbar">
+          <h2>Classes</h2>
+          <div class="toolbar-right">
+            <button id="class-add-btn" class="btn primary admin-only">Add</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Name</th><th>Major</th><th>Students</th><th class="admin-only">Actions</th></tr></thead>
+            <tbody id="classes-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Courses -->
+      <section id="view-courses" class="view card hidden">
+        <div class="toolbar">
+          <h2>Courses</h2>
+          <div class="toolbar-right">
+            <button id="course-add-btn" class="btn primary admin-only">Add</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Code</th><th>Name</th><th>Credits</th><th class="admin-only">Actions</th></tr></thead>
+            <tbody id="courses-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Grades -->
+      <section id="view-grades" class="view card hidden">
+        <div class="toolbar">
+          <h2>Enrollments &amp; Grades</h2>
+          <div class="toolbar-right">
+            <input id="grade-student-keyword" placeholder="Filter students by number / name" />
+            <select id="grade-student-select"><option value="">Select a student</option></select>
+            <select id="grade-course-select" class="admin-only"><option value="">Select a course</option></select>
+            <button id="enroll-btn" class="btn primary admin-only">Enroll</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Code</th><th>Course</th><th>Credits</th><th>Score</th><th class="admin-only">Actions</th></tr></thead>
+            <tbody id="grades-tbody"></tbody>
+          </table>
+        </div>
+        <p id="grades-summary" class="muted"></p>
+        <p id="grade-student-hint" class="muted hidden">Only the first 100 students are listed. Type a keyword to narrow the list.</p>
+      </section>
+
+      <!-- Statistics -->
+      <section id="view-stats" class="view hidden">
+        <div id="stats-tiles" class="tiles"></div>
+        <div class="stats-grid">
+          <div class="card"><h3>By major</h3><table><tbody id="stats-major"></tbody></table></div>
+          <div class="card"><h3>By gender</h3><table><tbody id="stats-gender"></tbody></table></div>
+          <div class="card"><h3>By class</h3><table><tbody id="stats-class"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- Users -->
+      <section id="view-users" class="view card hidden">
+        <div class="toolbar">
+          <h2>Users</h2>
+          <div class="toolbar-right">
+            <button id="user-add-btn" class="btn primary">Add</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Username</th><th>Role</th><th>Actions</th></tr></thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Audit log -->
+      <section id="view-logs" class="view card hidden">
+        <div class="toolbar">
+          <h2>Audit Log</h2>
+          <div class="toolbar-right">
+            <input id="log-username" placeholder="Filter by username" />
+            <button id="log-search-btn" class="btn secondary">Search</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Time</th><th>User</th><th>IP</th><th>Action</th><th>Status</th><th>Details</th></tr></thead>
+            <tbody id="logs-tbody"></tbody>
+          </table>
+        </div>
+        <div id="logs-pager" class="pager"></div>
+      </section>
+    </main>
+
+    <!-- Shared modal form -->
+    <div id="modal" class="modal hidden">
+      <div class="modal-box">
+        <h3 id="modal-title"></h3>
+        <form id="modal-form">
+          <div id="modal-fields"></div>
+          <div class="form-actions">
+            <button type="submit" class="btn primary">Save</button>
+            <button type="button" id="modal-cancel" class="btn secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

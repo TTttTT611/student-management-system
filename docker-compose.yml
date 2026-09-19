@@ -1,0 +1,52 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: student_db
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  backend:
+    build: .
+    environment:
+      DATABASE_URL: mysql+pymysql://root:${MYSQL_ROOT_PASSWORD:-root}@db:3306/student_db
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Public deployment: enable Caddy for automatic HTTPS
+  #   DOMAIN=your.domain.com COOKIE_SECURE=true TRUST_PROXY=true docker compose --profile https up -d
+  caddy:
+    image: caddy:2
+    profiles: ["https"]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    command: caddy reverse-proxy --from ${DOMAIN:-localhost} --to backend:8000
+    volumes:
+      - caddy_data:/data
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  caddy_data:

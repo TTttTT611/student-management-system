@@ -1,0 +1,18 @@
+# systemd unit example: /etc/systemd/system/student-management.service
+# Enable: systemctl daemon-reload && systemctl enable --now student-management
+[Unit]
+Description=Student Management System
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/student-management
+EnvironmentFile=/opt/student-management/.env
+ExecStartPre=/opt/student-management/venv/bin/alembic upgrade head
+ExecStart=/opt/student-management/venv/bin/uvicorn backend.main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
